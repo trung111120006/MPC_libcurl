@@ -23,13 +23,13 @@ double measure_download_speed(CURL *curl, const string &url, double &chunk_size)
     curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 50L);
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30L);
 
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer);
     curl_easy_setopt(curl, CURLOPT_FTP_SKIP_PASV_IP, 1L);
     curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
-    curl_easy_setopt(
-        curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
+    curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
 
     auto start = chrono::high_resolution_clock::now();
     CURLcode res = curl_easy_perform(curl);
@@ -37,9 +37,11 @@ double measure_download_speed(CURL *curl, const string &url, double &chunk_size)
 
     if (res != CURLE_OK)
     {
-        cerr << "curl_easy_perform() failed: " << curl_easy_getinfo << endl;
+        cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << endl;
         return -1.0;
     }
+    double download_speed_bps = 0.0;
+    curl_easy_getinfo(curl, CURLINFO_SPEED_DOWNLOAD, &download_speed_bps);
 
     double download_time = chrono::duration<double>(end - start).count();
     chunk_size = buffer.size() / 1000.0;                 // KB

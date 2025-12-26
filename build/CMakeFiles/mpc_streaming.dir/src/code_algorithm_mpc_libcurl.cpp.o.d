@@ -1,5 +1,5 @@
 CMakeFiles/mpc_streaming.dir/src/code_algorithm_mpc_libcurl.cpp.o: \
- /home/gnb/Trung/Code/Code_merge_MPC_libcurl/src/code_algorithm_mpc_libcurl.cpp \
+ /home/backne/Trung/code/code_mpc/MPC_libcurl/src/code_algorithm_mpc_libcurl.cpp \
  /usr/include/stdc-predef.h \
  /usr/include/x86_64-linux-gnu/c++/9/bits/stdc++.h \
  /usr/include/c++/9/cassert \
