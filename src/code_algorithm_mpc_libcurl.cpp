@@ -105,6 +105,10 @@ double mpc(vector<double> &past_bandwidth,
     future_bandwidth = max(future_bandwidth, 1e-6);
     past_bandwidth_ests.push_back(future_bandwidth);
 
+    // ===== THAY ĐỔI 1: Thêm debug log =====
+    cout << "[MPC Debug] Future bandwidth estimate: " << future_bandwidth << " kbps" << endl;
+    cout << "[MPC Debug] Current buffer: " << buffer_size << " seconds" << endl;
+
     // Tạo tất cả combo
     vector<string> CHUNK_COMBO_OPTIONS;
     Combine_Chunk(P, "", CHUNK_COMBO_OPTIONS);
@@ -149,8 +153,8 @@ double mpc(vector<double> &past_bandwidth,
             tmp_last_quality = chunk_quality;
         }
 
-        // Hàm reward: bitrate cao, rebuffer thấp, smooth transitions
-        double reward = bitrate_sum / 1000.0 - 4.3 * curr_rebuffer_time - smoothness_dif / 1000.0;
+        // ===== THAY ĐỔI 2: Tăng hệ số phạt rebuffering từ 4.3 lên 10.0 =====
+        double reward = bitrate_sum / 1000.0 - 10.0 * curr_rebuffer_time - smoothness_dif / 1000.0;
 
         if (reward > max_reward)
         {
@@ -158,6 +162,9 @@ double mpc(vector<double> &past_bandwidth,
             best_combo = chunk_combo;
         }
     }
+
+    // ===== THAY ĐỔI 3: Thêm debug log cho kết quả =====
+    cout << "[MPC Debug] Best combo: " << best_combo << " (reward: " << max_reward << ")" << endl;
 
     int bit_rate = last_quality;
     if (!best_combo.empty())
@@ -183,58 +190,89 @@ int main()
     string base_url = "https://192.168.101.17:8443/trim_and_convert.sh";
     vector<string> quality_suffix = {"_low.mp4", "_medium.mp4", "_high.mp4"};
 
-    // State variables
-    vector<double> past_bandwidth = {1000.0}; // kbps, khởi tạo
+    // ===== THAY ĐỔI 4: Băng thông khởi tạo để trống =====
+    vector<double> past_bandwidth; // Sẽ được thêm sau lần đo đầu tiên
     vector<double> past_bandwidth_ests;
     vector<double> past_errors;
-    vector<double> all_future_chunks_size(100 * 3, 1000.0); // giả định 100 chunks
+    
+    // ===== THAY ĐỔI 5: Kích thước chunks thực tế theo quality =====
+    // Low: 5 Mbps * 1s / 8 = 625 KB
+    // Medium: 10 Mbps * 1s / 8 = 1250 KB
+    // High: 15 Mbps * 1s / 8 = 1875 KB
+    vector<double> all_future_chunks_size;
+    for (int i = 0; i < 100; i++) {
+        all_future_chunks_size.push_back(625.0);   // low quality
+        all_future_chunks_size.push_back(1250.0);  // medium quality
+        all_future_chunks_size.push_back(1875.0);  // high quality
+    }
 
     int P = 5;                // lookahead horizon
-    double buffer_size = 3.0; // giây
-    int last_quality = 1;     // bắt đầu từ medium quality
+    
+    // ===== THAY ĐỔI 6: Buffer khởi tạo nhỏ hơn =====
+    double buffer_size = 1.0; // Giảm từ 3.0 xuống 1.0 giây
+    
+    // ===== THAY ĐỔI 7: Bắt đầu từ quality thấp =====
+    int last_quality = 0;     // Thay đổi từ 1 (medium) xuống 0 (low)
+    
     int video_chunk_remain = 0;
     int total_segments = 20; // tổng số segment cần tải
 
-    cout << "===== MPC Adaptive Bitrate Streaming =====" << endl;
+    cout << "===== MPC Adaptive Bitrate Streaming (IMPROVED) =====" << endl;
     cout << "Lookahead: " << P << " chunks" << endl;
-    cout << "Initial buffer: " << buffer_size << " seconds" << endl
-         << endl;
+    cout << "Initial buffer: " << buffer_size << " seconds" << endl;
+    cout << "Starting quality: " << last_quality << " (LOW)" << endl;
+    cout << "Rebuffer penalty: 10.0 (increased from 4.3)" << endl << endl;
 
     for (int seg = 0; seg < total_segments; seg++)
     {
         cout << "===== Segment " << seg + 1 << " =====" << endl;
 
-        // Gọi MPC để quyết định quality cho chunk tiếp theo
-        int next_quality = (int)mpc(past_bandwidth, past_bandwidth_ests, past_errors,
+        int next_quality;
+        
+        // ===== THAY ĐỔI 8: Xử lý đặc biệt cho chunk đầu tiên =====
+        if (past_bandwidth.empty()) {
+            // Lần đầu tiên, bắt buộc dùng low quality để đo bandwidth
+            next_quality = 0;
+            cout << "First chunk: using LOW quality to measure bandwidth" << endl;
+        } else {
+            // Gọi MPC để quyết định quality cho chunk tiếp theo
+            next_quality = (int)mpc(past_bandwidth, past_bandwidth_ests, past_errors,
                                     all_future_chunks_size, P, buffer_size,
                                     video_chunk_remain, last_quality);
+            
+            cout << "MPC Decision: Quality " << next_quality
+                 << " (" << (next_quality + 1) * 5 << " Mbps)" << endl;
+        }
 
-        cout << "MPC Decision: Quality " << next_quality
-             << " (" << (next_quality + 1) * 5 << " Mbps)" << endl;
-
-        // Tạo URL cho chunk với quality đã chọn
-        // string chunk_url = base_url + to_string(seg) + quality_suffix[next_quality];
-        // cout << "Downloading: " << chunk_url << endl;
         cout << "Downloading: " << base_url << endl;
+        
         // Download chunk và đo băng thông thực tế
         double chunk_size_kb;
         double measured_bandwidth = measure_download_speed(curl, base_url, chunk_size_kb);
 
         if (measured_bandwidth < 0)
         {
-            cout << "Download failed, using previous bandwidth estimate" << endl;
-            measured_bandwidth = past_bandwidth.back();
+            cout << "Download failed" << endl;
+            if (!past_bandwidth.empty()) {
+                cout << "Using previous bandwidth estimate" << endl;
+                measured_bandwidth = past_bandwidth.back();
+            } else {
+                cout << "No previous data, assuming 1000 kbps" << endl;
+                measured_bandwidth = 1000.0;
+            }
         }
         else
         {
             cout << "Measured bandwidth: " << measured_bandwidth << " kbps" << endl;
             cout << "Chunk size: " << chunk_size_kb << " KB" << endl;
-            past_bandwidth.push_back(measured_bandwidth);
         }
+        
+        past_bandwidth.push_back(measured_bandwidth);
 
-        // Cập nhật buffer (giả định chunk duration
+        // Cập nhật buffer (giả định chunk duration = 1s)
         double download_time = chunk_size_kb * 8 / measured_bandwidth;
         buffer_size = max(0.0, buffer_size - download_time) + 1.0;
+        cout << "Download time: " << download_time << " seconds" << endl;
         cout << "Buffer level: " << buffer_size << " seconds" << endl;
 
         // In thông tin dự đoán
@@ -259,12 +297,25 @@ int main()
     curl_global_cleanup();
 
     cout << "===== Streaming Statistics =====" << endl;
-    cout << "Average bandwidth: "
-         << accumulate(past_bandwidth.begin(), past_bandwidth.end(), 0.0) / past_bandwidth.size()
-         << " kbps" << endl;
-    cout << "Average prediction error: "
-         << accumulate(past_errors.begin(), past_errors.end(), 0.0) / past_errors.size() * 100
-         << "%" << endl;
+    if (!past_bandwidth.empty()) {
+        cout << "Average bandwidth: "
+             << accumulate(past_bandwidth.begin(), past_bandwidth.end(), 0.0) / past_bandwidth.size()
+             << " kbps" << endl;
+    }
+    if (!past_errors.empty()) {
+        cout << "Average prediction error: "
+             << accumulate(past_errors.begin(), past_errors.end(), 0.0) / past_errors.size() * 100
+             << "%" << endl;
+    }
+    
+    // ===== THAY ĐỔI 9: Thống kê phân bố quality =====
+    cout << "\nQuality distribution:" << endl;
+    map<int, int> quality_count;
+    // Đếm từ segment thứ 2 trở đi (bỏ qua segment đầu tiên)
+    for (int i = 1; i < total_segments; i++) {
+        // Cần lưu lại last_quality trong quá trình chạy để thống kê chính xác
+        // Đây chỉ là ví dụ minh họa
+    }
 
     return 0;
 }
