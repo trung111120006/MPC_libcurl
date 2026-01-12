@@ -135,9 +135,9 @@ int main() {
     // Print final statistics
     StreamingStats::printFinalStats(pastBandwidth, pastErrors, qualityHistory);
     
-    std::cout << "\n✓ All files saved to: " << Config::DOWNLOAD_DIR << std::endl;
+    std::cout << "\nAll files saved to: " << Config::DOWNLOAD_DIR << std::endl;
     if (Config::DECODE_REALTIME) {
-        std::cout << "✓ Decode processes running" << std::endl;
+        std::cout << " Decode processes running" << std::endl;
         std::cout << "  Check: " << Config::DECODED_OUTPUT_DIR << std::endl;
     }
     

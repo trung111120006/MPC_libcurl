@@ -1,3 +1,5 @@
 build/
 download/
 decoded_output/
+obj/
+bin/

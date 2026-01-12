@@ -3,7 +3,7 @@
 namespace Config {
     const std::string DOWNLOAD_DIR = "/home/backne/Trung/code/code_mpc/MPC_libcurl/download";
     const std::string DECODED_OUTPUT_DIR = "/home/backne/Trung/code/code_mpc/MPC_libcurl/decoded_output";
-    const std::string DECODE_SCRIPT_PATH = "/home/backne/Trung/code/code_mpc/MPC_libcurl/auto_decode.sh";
+    const std::string DECODE_SCRIPT_PATH = "/home/backne/Trung/code/code_mpc/MPC_libcurl/scripts/auto_decode.sh";
     
     const bool DECODE_REALTIME = true;
     const bool DECODE_BACKGROUND = true;

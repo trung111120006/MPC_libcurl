@@ -31,8 +31,8 @@ namespace Decoder {
         
         FileUtils::createDirectory(Config::DECODED_OUTPUT_DIR);
         
-        std::cout << "📥 Input:  " << binFilePath << std::endl;
-        std::cout << "🔧 Running decode script..." << std::endl;
+        std::cout << " Input:  " << binFilePath << std::endl;
+        std::cout << " Running decode script..." << std::endl;
         
         std::stringstream logFilename;
         logFilename << Config::DECODED_OUTPUT_DIR << "/decode_segment_" 
@@ -52,17 +52,17 @@ namespace Decoder {
             cmd << " 2>&1 | tee " << logFile;
         }
         
-        std::cout << "📝 Command: " << cmd.str() << std::endl;
+        std::cout << " Command: " << cmd.str() << std::endl;
         
         int result = system(cmd.str().c_str());
         
         if (Config::DECODE_BACKGROUND || result == 0) {
-            std::cout << "✅ Decode process " 
+            std::cout << "Decode process " 
                       << (Config::DECODE_BACKGROUND ? "started" : "completed") 
                       << " successfully" << std::endl;
             return true;
         } else {
-            std::cerr << "❌ Decode failed with exit code: " << result << std::endl;
+            std::cerr << " Decode failed with exit code: " << result << std::endl;
             return false;
         }
     }
