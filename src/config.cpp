@@ -1,4 +1,5 @@
-#include "config.h"
+#include "include/config.h"
+
 
 namespace Config {
     const std::string DOWNLOAD_DIR = "/home/backne/Trung/code/code_mpc/MPC_libcurl/download";
