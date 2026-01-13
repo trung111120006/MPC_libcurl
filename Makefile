@@ -1,6 +1,6 @@
 CXX = g++
 CXXFLAGS = -std=c++11 -Wall -Wextra -I./include
-LDFLAGS = -lcurl
+LDFLAGS = -lcurl -ltinyxml2
 
 SRC_DIR = src
 INCLUDE_DIR = include

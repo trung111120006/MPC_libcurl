@@ -8,16 +8,14 @@ namespace Config {
     const bool DECODE_REALTIME = true;
     const bool DECODE_BACKGROUND = true;
     
-    const std::string BASE_URL = "https://100.66.2.42:8443/longdress_test2.bin";
-    const std::vector<std::string> QUALITY_SUFFIX = {"_low", "_medium", "_high"};
-    const std::vector<std::string> QUALITY_NAMES = {"LOW", "MEDIUM", "HIGH"};
-    
+    const std::string SERVER_BASE_URL = "https://100.66.2.42:8443/";
+    const std::string MPD_URL = "https://100.66.2.42:8443/server.mpd";
+
     const int LOOKAHEAD_P = 5;
     const double INITIAL_BUFFER_SIZE = 1.0;
     const double REBUFFER_PENALTY = 10.0;
-    const int TOTAL_SEGMENTS = 10;
     
-    const std::vector<double> CHUNK_SIZES = {625.0, 1250.0, 1875.0};
+    const std::vector<std::string> QUALITY_NAMES = {"low", "medium", "high"};
     
     void init() {
         // Initialization logic nếu cần

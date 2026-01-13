@@ -15,20 +15,18 @@ namespace Config {
     extern const bool DECODE_REALTIME;
     extern const bool DECODE_BACKGROUND;
     
-    // Streaming settings
-    extern const std::string BASE_URL;
-    extern const std::vector<std::string> QUALITY_SUFFIX;
-    extern const std::vector<std::string> QUALITY_NAMES;
+    // -===== Server / MPD url ======
+    extern const std::string SERVER_BASE_URL;
+    extern const std::string MPD_URL;
     
     // MPC parameters
     extern const int LOOKAHEAD_P;
     extern const double INITIAL_BUFFER_SIZE;
     extern const double REBUFFER_PENALTY;
-    extern const int TOTAL_SEGMENTS;
     
-    // Chunk sizes (kbps)
-    extern const std::vector<double> CHUNK_SIZES;
-    
+    // Quality names
+    extern const std::vector<std::string> QUALITY_NAMES;
+        
     void init();
 }
 

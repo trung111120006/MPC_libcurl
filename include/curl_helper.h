@@ -20,6 +20,9 @@ namespace CurlHelper {
     bool downloadFile(CURL* curl, const std::string& url, 
                       const std::string& savePath, std::string& extension);
     
+    // Download to string
+    bool downloadToString(CURL* curl, const std::string& url, std::string& content);
+    
     // Detect file extension từ URL hoặc Content-Type
     std::string getFileExtension(CURL* curl, const std::string& url);
     

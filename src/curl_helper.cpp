@@ -30,7 +30,7 @@ namespace CurlHelper {
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
         curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L);
-        curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
+        curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
     }
     
     std::string getFileExtension(CURL* curl, const std::string& url) {
@@ -107,6 +107,21 @@ namespace CurlHelper {
         extension = getFileExtension(curl, url);
         std::cout << "✓ File saved to: " << savePath << std::endl;
         std::cout << "  Detected format: " << extension << std::endl;
+        return true;
+    }
+    
+    bool downloadToString(CURL* curl, const std::string& url, std::string& content) {
+        setupCurlOptions(curl, url);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &content);
+        
+        CURLcode res = curl_easy_perform(curl);
+        
+        if (res != CURLE_OK) {
+            std::cerr << "Download failed: " << curl_easy_strerror(res) << std::endl;
+            return false;
+        }
+        
         return true;
     }
 }

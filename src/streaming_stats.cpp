@@ -7,8 +7,7 @@
 
 namespace StreamingStats {
     void printSegmentHeader(int segNum, int totalSegments) {
-        std::cout << "===== Segment " << segNum << "/" << totalSegments 
-                  << " =====" << std::endl;
+        std::cout << "===== Segment " << segNum << " =====" << std::endl;
     }
     
     void printMPCDecision(int quality, const std::string& qualityName) {
