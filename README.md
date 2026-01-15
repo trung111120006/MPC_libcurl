@@ -52,9 +52,15 @@ Make sure that:
 Go back to the client project and build as well as run the application:
 
 ```bash
-make && make run
+mkdir build && cd build
+cmake .. 
+cmake --build . -j$(nproc)
 ```
-
+or
+```bash
+cmake -B build 
+cmake --build build
+```
 ## Additional Information
 
 - The client and server should run on different devices  
