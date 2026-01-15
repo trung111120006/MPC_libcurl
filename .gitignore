@@ -1,6 +1,5 @@
 build/
 download/
 decoded_output/
-obj/
-bin/
+build/
 log.txt
